@@ -1,6 +1,11 @@
-# Kaizen Questions Bot
+# 🤖 Kaizen Questions Bot
 
 Telegram-бот для щоденних кайдзен-питань з інтеграцією AI через n8n.
+
+[![Node.js](https://img.shields.io/badge/Node.js-20.x-green.svg)](https://nodejs.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-13+-blue.svg)](https://www.postgresql.org/)
+[![PM2](https://img.shields.io/badge/PM2-5.x-orange.svg)](https://pm2.keymetrics.io/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## 🎯 Мета проєкту
 
@@ -16,8 +21,13 @@ Telegram-бот для щоденних кайдзен-питань з інте�
 
 ## 🚀 Швидкий старт
 
-### 1. Встановлення залежностей
+### 1. Клонування репозиторію
+```bash
+git clone <your-repo-url>
+cd KaiDzen
+```
 
+### 2. Встановлення залежностей
 ```bash
 npm install
 ```
@@ -252,6 +262,20 @@ src/
 4. Запустіть міграції
 5. Запустіть сервер
 
+### Деплой на Linux сервер з PM2
+```bash
+# Автоматичний деплой
+chmod +x deploy.sh
+./deploy.sh
+
+# Або ручний деплой
+pm2 start ecosystem.config.js --env production
+pm2 save
+pm2 startup
+```
+
+📖 **Детальна інструкція:** [DEPLOYMENT.md](DEPLOYMENT.md)
+
 ### Docker (майбутнє)
 ```bash
 docker-compose up -d
@@ -273,17 +297,36 @@ docker-compose up -d
 - [ ] Групи та соціальні функції
 - [ ] Мобільний додаток
 
+## 📚 Документація
+
+- 📖 **[API Endpoints](API_ENDPOINTS.md)** - Детальна документація API
+- 🚀 **[Deployment Guide](DEPLOYMENT.md)** - Інструкція по деплою на Linux
+- 🤖 **[n8n Setup](N8N_SETUP.md)** - Налаштування n8n агента
+- 💬 **[n8n System Prompt](N8N_SYSTEM_PROMPT.md)** - Системний промпт для AI агента
+
 ## 🤝 Розробка
 
 ### Встановлення для розробки
 ```bash
 git clone <repository>
-cd kaizen-questions-bot
+cd KaiDzen
 npm install
 cp env.example .env
 # Налаштуйте .env файл
 npm run migrate
 npm run dev
+```
+
+### Оновлення на сервері
+```bash
+# Автоматичне оновлення
+./update.sh
+
+# Або ручне оновлення
+git pull origin main
+npm install
+npm run migrate
+pm2 restart kaizen-bot
 ```
 
 ### Тестування
