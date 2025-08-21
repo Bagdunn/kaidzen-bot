@@ -7,6 +7,7 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "migrate": "node src/database/migrate.js",
+    "migrate-new": "node src/database/migrate-new.js",
     "seed": "node src/database/seed.js"
   },
   "keywords": ["telegram", "bot", "kaizen", "ai", "n8n"],
