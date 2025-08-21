@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # PostgreSQL база даних
+  postgres:
+    image: postgres:15-alpine
+    container_name: kaizen-postgres
+    environment:
+      POSTGRES_DB: kaizen_questions
+      POSTGRES_USER: kaizen_user
+      POSTGRES_PASSWORD: kaizen_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - kaizen-network
+    restart: unless-stopped
+
+  # n8n для AI функціональності
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: kaizen-n8n
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=kaizen_password
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://localhost:5678/
+      - GENERIC_TIMEZONE=Europe/Kiev
+    volumes:
+      - n8n_data:/home/node/.n8n
+    ports:
+      - "5678:5678"
+    networks:
+      - kaizen-network
+    restart: unless-stopped
+    depends_on:
+      - postgres
+
+  # Kaizen Questions Bot
+  kaizen-bot:
+    build: .
+    container_name: kaizen-bot
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://kaizen_user:kaizen_password@postgres:5432/kaizen_questions
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - N8N_WEBHOOK_URL=http://n8n:5678/webhook/kaizen-bot
+      - N8N_API_KEY=${N8N_API_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      - PORT=3000
+    ports:
+      - "3000:3000"
+    networks:
+      - kaizen-network
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - n8n
+    volumes:
+      - ./logs:/app/logs
+
+  # Nginx для проксування (опціонально)
+  nginx:
+    image: nginx:alpine
+    container_name: kaizen-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    networks:
+      - kaizen-network
+    restart: unless-stopped
+    depends_on:
+      - kaizen-bot
+      - n8n
+
+volumes:
+  postgres_data:
+    driver: local
+  n8n_data:
+    driver: local
+
+networks:
+  kaizen-network:
+    driver: bridge
