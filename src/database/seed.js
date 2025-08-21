@@ -2,7 +2,12 @@ const { Pool } = require('pg');
 require('dotenv').config();
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  host: process.env.DB_HOST || 'localhost',
+  port: process.env.DB_PORT || 5432,
+  database: process.env.DB_NAME || 'kaizen_questions',
+  user: process.env.DB_USER || 'kaizen_user',
+  password: process.env.DB_PASSWORD || '',
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
 });
 
 const seedData = async () => {
